@@ -23,6 +23,8 @@ using namespace glm;
 #include <common/objloader.hpp>
 #include <common/vboindexer.hpp>
 
+#define TEST2D
+
 int main( void )
 {
 	// Initialise GLFW
@@ -101,7 +103,7 @@ int main( void )
 	
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
-#define TEST2D
+
 #ifndef TEST2D
 	// Read our .obj file
 	std::vector<glm::vec3> vertices;
