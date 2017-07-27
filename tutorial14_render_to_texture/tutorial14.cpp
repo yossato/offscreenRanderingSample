@@ -190,9 +190,9 @@ int main( void )
     GLuint sourceTexture = textures[1];
     cv::Mat inputImage = cv::Mat::zeros(cv::Size(128,128),CV_8UC3);
 
-    for(int v=0,ve=inputImage.rows;v<ve;v+=4){//Draw chess board pattern
-        for(int u=0,ue=inputImage.cols;u<ue;u+=4){
-            inputImage.at<cv::Vec3b>(v,u) = cv::Vec3b(255,255,255);
+    for(int v=0,ve=inputImage.rows;v<ve;++v){//Draw chess board pattern
+        for(int u=0,ue=inputImage.cols;u<ue;++u){
+            inputImage.at<cv::Vec3b>(v,u) = cv::Vec3b(0,255,0)*(((u/10)%2)^((v/10)%2));
         }
     }
     glBindTexture(GL_TEXTURE_2D,sourceTexture);
@@ -307,7 +307,7 @@ int main( void )
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
 #ifdef TEST2D
-      glBindTexture(GL_TEXTURE_2D, uvbuffer);
+      glBindTexture(GL_TEXTURE_2D, sourceTexture);
 #else
         glBindTexture(GL_TEXTURE_2D, Texture);
 #endif
