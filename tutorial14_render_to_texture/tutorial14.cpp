@@ -154,6 +154,18 @@ int main( void )
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
+    // Two UV coordinatesfor each vertex. They were created withe Blender.
+    static const GLfloat g_uv_buffer_data[] = {
+        0.f, 1.0f,
+        1.f, 1.f,
+        0.f, 0.f
+    };
+
+    GLuint uvbuffer;
+    glGenBuffers(1, &uvbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+
 #endif
     // Get a handle for our "LightPosition" uniform
     glUseProgram(programID);
@@ -170,8 +182,34 @@ int main( void )
 
 	// The texture we're going to render to
 	GLuint renderedTexture;
+
+#ifdef TEST2D
+    GLuint textures[2];
+    glGenTextures(2, textures);
+    renderedTexture = textures[0];
+    GLuint sourceTexture = textures[1];
+    cv::Mat inputImage = cv::Mat::zeros(cv::Size(128,128),CV_8UC3);
+
+    for(int v=0,ve=inputImage.rows;v<ve;v+=4){//Draw chess board pattern
+        for(int u=0,ue=inputImage.cols;u<ue;u+=4){
+            inputImage.at<cv::Vec3b>(v,u) = cv::Vec3b(255,255,255);
+        }
+    }
+    glBindTexture(GL_TEXTURE_2D,sourceTexture);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,inputImage.cols,inputImage.rows,0,GL_BGR,GL_UNSIGNED_BYTE,inputImage.data);
+
+    //背景色
+    static const GLfloat border[] = { 0.0, 0.0, 0.0, 0.0 };
+    //テクスチャの境界色
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
+    //テクスチャの繰り返しの設定
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#else
 	glGenTextures(1, &renderedTexture);
-	
+#endif
 	// "Bind" the newly created texture : all future texture functions will modify this texture
 	glBindTexture(GL_TEXTURE_2D, renderedTexture);
 
@@ -232,6 +270,7 @@ int main( void )
 	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 
+
 	// Create and compile our GLSL program from the shaders
 	GLuint quad_programID = LoadShaders( "Passthrough.vertexshader", "WobblyTexture.fragmentshader" );
 	GLuint texID = glGetUniformLocation(quad_programID, "renderedTexture");
@@ -267,7 +306,11 @@ int main( void )
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Texture);
+#ifdef TEST2D
+      glBindTexture(GL_TEXTURE_2D, uvbuffer);
+#else
+        glBindTexture(GL_TEXTURE_2D, Texture);
+#endif
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
 		glUniform1i(TextureID, 0);
 
@@ -336,6 +379,18 @@ int main( void )
             (void*)0            // array buffer offset
         );
 
+        // 2nd attribute buffer : UVs
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+        glVertexAttribPointer(
+            1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+            2,                                // size : U+V => 2
+            GL_FLOAT,                         // type
+            GL_FALSE,                         // normalized?
+            0,                                // stride
+            (void*)0                          // array buffer offset
+        );
+
         // Draw the triangle !
         glDrawArrays(GL_TRIANGLES, 0, 3); // 3 indices starting at 0 -> 1 triangle
 
@@ -355,6 +410,7 @@ int main( void )
         char key =cv::waitKey(1);
 
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
 #endif
 
 
