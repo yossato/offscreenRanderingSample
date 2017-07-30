@@ -258,7 +258,7 @@ int main( void )
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		return false;
 
-	
+#ifndef TEST2D
 	// The fullscreen quad's FBO
 	static const GLfloat g_quad_vertex_buffer_data[] = { 
 		-1.0f, -1.0f, 0.0f,
@@ -279,7 +279,7 @@ int main( void )
 	GLuint quad_programID = LoadShaders( "Passthrough.vertexshader", "WobblyTexture.fragmentshader" );
 	GLuint texID = glGetUniformLocation(quad_programID, "renderedTexture");
 	GLuint timeID = glGetUniformLocation(quad_programID, "time");
-    
+#endif
 	
 	do{
 		// Render to our framebuffer
@@ -488,8 +488,10 @@ int main( void )
 	glDeleteFramebuffers(1, &FramebufferName);
 	glDeleteTextures(1, &renderedTexture);
 	glDeleteRenderbuffers(1, &depthrenderbuffer);
-	glDeleteBuffers(1, &quad_vertexbuffer);
-	glDeleteVertexArrays(1, &VertexArrayID);
+#ifndef TEST2D
+    glDeleteBuffers(1, &quad_vertexbuffer);
+#endif
+    glDeleteVertexArrays(1, &VertexArrayID);
 
 
 	// Close OpenGL window and terminate GLFW
