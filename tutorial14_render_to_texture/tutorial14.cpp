@@ -41,6 +41,10 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+#ifdef TEST2D
+    glfwWindowHint( GLFW_VISIBLE, 0 );//オフスクリーンレンダリング。
+#endif
+
 	// Open a window and create its OpenGL context
 	window = glfwCreateWindow( 1024, 768, "Tutorial 14 - Render To Texture", NULL, NULL);
 	if( window == NULL ){
@@ -290,10 +294,10 @@ int main( void )
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
-		glm::mat4 ProjectionMatrix = getProjectionMatrix();
+        glm::mat4 ProjectionMatrix = getProjectionMatrix();
         glm::mat4 ViewMatrix = getViewMatrix();
-
         glm::mat4 ModelMatrix = glm::mat4(1.0);
+
 #ifdef TEST2D
         glm::mat4 MVP = glm::mat4(1.0);
 #else
@@ -420,7 +424,7 @@ int main( void )
 
 
 
-
+#ifndef TEST2D
 		// Render to the screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // Render on the whole framebuffer, complete from the lower left corner to the upper right
@@ -460,6 +464,7 @@ int main( void )
 
 		// Swap buffers
 		glfwSwapBuffers(window);
+#endif
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
