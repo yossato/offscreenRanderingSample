@@ -41,6 +41,10 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+#ifdef TEST2D
+    glfwWindowHint( GLFW_VISIBLE, 0 );//オフスクリーンレンダリング。
+#endif
+
 	// Open a window and create its OpenGL context
 	window = glfwCreateWindow( 1024, 768, "Tutorial 14 - Render To Texture", NULL, NULL);
 	if( window == NULL ){
@@ -254,7 +258,7 @@ int main( void )
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		return false;
 
-	
+#ifndef TEST2D
 	// The fullscreen quad's FBO
 	static const GLfloat g_quad_vertex_buffer_data[] = { 
 		-1.0f, -1.0f, 0.0f,
@@ -275,7 +279,7 @@ int main( void )
 	GLuint quad_programID = LoadShaders( "Passthrough.vertexshader", "WobblyTexture.fragmentshader" );
 	GLuint texID = glGetUniformLocation(quad_programID, "renderedTexture");
 	GLuint timeID = glGetUniformLocation(quad_programID, "time");
-    
+#endif
 	
 	do{
 		// Render to our framebuffer
@@ -290,10 +294,15 @@ int main( void )
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
-		glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		glm::mat4 ViewMatrix = getViewMatrix();
-		glm::mat4 ModelMatrix = glm::mat4(1.0);
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+        glm::mat4 ProjectionMatrix = getProjectionMatrix();
+        glm::mat4 ViewMatrix = getViewMatrix();
+        glm::mat4 ModelMatrix = glm::mat4(1.0);
+
+#ifdef TEST2D
+        glm::mat4 MVP = glm::mat4(1.0);
+#else
+        glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+#endif
 
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
@@ -415,7 +424,7 @@ int main( void )
 
 
 
-
+#ifndef TEST2D
 		// Render to the screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // Render on the whole framebuffer, complete from the lower left corner to the upper right
@@ -455,6 +464,7 @@ int main( void )
 
 		// Swap buffers
 		glfwSwapBuffers(window);
+#endif
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
@@ -478,8 +488,10 @@ int main( void )
 	glDeleteFramebuffers(1, &FramebufferName);
 	glDeleteTextures(1, &renderedTexture);
 	glDeleteRenderbuffers(1, &depthrenderbuffer);
-	glDeleteBuffers(1, &quad_vertexbuffer);
-	glDeleteVertexArrays(1, &VertexArrayID);
+#ifndef TEST2D
+    glDeleteBuffers(1, &quad_vertexbuffer);
+#endif
+    glDeleteVertexArrays(1, &VertexArrayID);
 
 
 	// Close OpenGL window and terminate GLFW
