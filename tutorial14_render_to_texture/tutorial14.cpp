@@ -102,9 +102,10 @@ int main( void )
 	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
 	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
-	// Load the texture
+    // Load the texture
+#ifndef TEST2D
 	GLuint Texture = loadDDS("uvmap.DDS");
-	
+#endif
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
 
@@ -483,8 +484,9 @@ int main( void )
     glDeleteVertexArrays(1, &VertexArrayID);
 #endif
 	glDeleteProgram(programID);
+#ifndef TEST2D
 	glDeleteTextures(1, &Texture);
-
+#endif
 	glDeleteFramebuffers(1, &FramebufferName);
 	glDeleteTextures(1, &renderedTexture);
 	glDeleteRenderbuffers(1, &depthrenderbuffer);
