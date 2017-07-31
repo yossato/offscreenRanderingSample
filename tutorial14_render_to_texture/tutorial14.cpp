@@ -228,12 +228,13 @@ int main( void )
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// The depth buffer
+#ifndef TEST2D
 	GLuint depthrenderbuffer;
 	glGenRenderbuffers(1, &depthrenderbuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
-
+#endif
 	//// Alternative : Depth texture. Slower, but you can sample it later in your shader
 	//GLuint depthTexture;
 	//glGenTextures(1, &depthTexture);
@@ -489,8 +490,9 @@ int main( void )
 #endif
 	glDeleteFramebuffers(1, &FramebufferName);
 	glDeleteTextures(1, &renderedTexture);
-	glDeleteRenderbuffers(1, &depthrenderbuffer);
 #ifndef TEST2D
+    glDeleteRenderbuffers(1, &depthrenderbuffer);
+
     glDeleteBuffers(1, &quad_vertexbuffer);
 #endif
     glDeleteVertexArrays(1, &VertexArrayID);
